@@ -1296,7 +1296,7 @@ export default function Home() {
                       <>
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => void loadPlaylist()} disabled={isLoadingSpotifyLibrary}
                           className="px-4 py-2 rounded-lg font-semibold transition bg-green-600/80 hover:bg-green-600 text-white disabled:opacity-50">
-                          {isLoadingSpotifyLibrary ? "…" : "🔄 Actualizar"}
+                          {isLoadingSpotifyLibrary ? "…" : "Actualizar"}
                         </motion.button>
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleSpotifyDisconnect}
                           className="px-4 py-2 rounded-lg font-semibold transition bg-white/10 hover:bg-white/20 text-white">
@@ -1336,7 +1336,7 @@ export default function Home() {
                     <input type="text" value={spotifySearchQuery} onChange={(e) => setSpotifySearchQuery(e.target.value)} placeholder="Buscar canción en Spotify..."
                       className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-zinc-500 outline-none focus:border-purple-500/50 transition" />
                     <button type="submit" disabled={isSpotifySearching} className="px-6 py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white rounded-lg font-semibold transition">
-                      {isSpotifySearching ? "..." : "🔍"}
+                      {isSpotifySearching ? "..." : ""}
                     </button>
                   </form>
                 )}

@@ -219,16 +219,20 @@ function mapSavedTrack(track: SpotifyApiTrack): SpotifyPlaylistTrack {
   };
 }
 
-/** Canciones guardadas (likes) del usuario — GET /v1/me/tracks */
-export async function fetchSpotifySavedTracks(maxTracks = 200): Promise<SpotifyPlaylistTrack[]> {
+/** 
+ * Canciones guardadas (likes) del usuario — GET /v1/me/tracks
+ * Ahora trae TODAS las canciones sin límite (paginación automática)
+ */
+export async function fetchSpotifySavedTracks(): Promise<SpotifyPlaylistTrack[]> {
   const token = await getSpotifyToken();
   if (!token) throw new Error("No Spotify token available");
 
   const allTracks: SpotifyPlaylistTrack[] = [];
   let offset = 0;
   const pageSize = 50;
+  let total = 1;
 
-  while (allTracks.length < maxTracks) {
+  while (offset < total) {
     const params = new URLSearchParams({
       limit: pageSize.toString(),
       offset: offset.toString(),
@@ -245,6 +249,7 @@ export async function fetchSpotifySavedTracks(maxTracks = 200): Promise<SpotifyP
     if (!response.ok) throw new Error("Failed to fetch saved tracks");
 
     const data = await response.json();
+    total = data.total ?? 0;
     const items = (data.items ?? []) as SpotifySavedItem[];
 
     if (items.length === 0) break;
@@ -253,11 +258,9 @@ export async function fetchSpotifySavedTracks(maxTracks = 200): Promise<SpotifyP
       const track = item.track;
       if (!track || track.type !== "track") continue;
       allTracks.push(mapSavedTrack(track));
-      if (allTracks.length >= maxTracks) break;
     }
 
-    offset += items.length;
-    if (items.length < pageSize || !data.next) break;
+    offset += pageSize;
   }
 
   return allTracks;
@@ -287,3 +290,4 @@ export async function searchSpotifyTracks(query: string, limit = 20): Promise<Sp
     source: "spotify" as const,
   }));
 }
+

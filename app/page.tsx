@@ -150,7 +150,7 @@ const collaborators: CollaboratorProfile[] = [
     displayName: "Celex",
     username: "xxq7131",
     role: "Developer",
-    img: "https://i.imgur.com/fGVerIz.jpeg",
+    img: "https://i.imgur.com/XmbGsBE.jpeg",
     banner: "https://i.imgur.com/H2HXJY0.jpeg",
     customStatus: "",
     bio: "ilove cats ",

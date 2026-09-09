@@ -84,13 +84,32 @@ const STATUS_COLORS: Record<CollaboratorStatus, string> = {
   offline: "#80848e",
 };
 
-const TAB_BACKGROUNDS: Record<string, string> = {
+// Fondo predeterminado de cada pestaña. Puedes cambiar estas URLs de Imgur
+// cuando quieras — son el punto de partida antes de que el usuario elija
+// otro fondo desde Configuración.
+const DEFAULT_TAB_BACKGROUNDS: Record<string, string> = {
   home:     "https://i.imgur.com/Ompb0lt.png",
   projects: "https://i.imgur.com/Ompb0lt.png",
   apps:     "https://i.imgur.com/Ompb0lt.png",
   ia:       "https://i.imgur.com/Ompb0lt.png",
   music:    "https://i.imgur.com/Ompb0lt.png",
 };
+
+// Pestañas cuyo fondo se puede personalizar desde Configuración.
+const BACKGROUND_TABS = ["home", "projects", "apps", "ia", "music"] as const;
+
+// Catálogo de fondos disponibles para elegir en Configuración.
+// Agrega aquí tus propios links de Imgur (name = lo que se ve en el selector,
+// url = el link directo de la imagen). Puedes repetir o quitar los que quieras.
+type BackgroundOption = { name: string; url: string };
+const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
+  { name: "Original", url: "https://i.imgur.com/Ompb0lt.png" },
+  { name: "Fondo 2", url: "https://i.imgur.com/TkPfwrh.png" },
+  { name: "Fondo 3", url: "https://i.imgur.com/FppGRaZ.png" },
+  { name: "Fondo 4", url: "https://i.imgur.com/aG4zFeJ.png" },
+];
+
+const SETTINGS_STORAGE_KEY = "site-settings-v1";
 
 const CLD_DEMO = "https://res.cloudinary.com/dqm17v2b6/video/upload/v1773902976/lv_0_20260319000205_rtckep.mp4";
 
@@ -514,6 +533,49 @@ export default function Home() {
   const [selected, setSelected] = useState(movies[0]);
   const [index, setIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("home");
+  const [tabBackgrounds, setTabBackgrounds] = useState<Record<string, string>>(DEFAULT_TAB_BACKGROUNDS);
+  const [cardsTransparent, setCardsTransparent] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  // Cargar configuración guardada (fondos elegidos + transparencia de tarjetas)
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.tabBackgrounds) setTabBackgrounds({ ...DEFAULT_TAB_BACKGROUNDS, ...saved.tabBackgrounds });
+        if (typeof saved.cardsTransparent === "boolean") setCardsTransparent(saved.cardsTransparent);
+      }
+    } catch {
+      // si falla la lectura, se quedan los valores predeterminados
+    } finally {
+      setSettingsLoaded(true);
+    }
+  }, []);
+
+  // Guardar configuración cada vez que cambie
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    try {
+      window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ tabBackgrounds, cardsTransparent }));
+    } catch {
+      // almacenamiento no disponible, se ignora
+    }
+  }, [tabBackgrounds, cardsTransparent, settingsLoaded]);
+
+  const setTabBackground = (tab: string, url: string) => {
+    setTabBackgrounds((prev) => ({ ...prev, [tab]: url }));
+  };
+
+  const resetTabBackground = (tab: string) => {
+    setTabBackgrounds((prev) => ({ ...prev, [tab]: DEFAULT_TAB_BACKGROUNDS[tab] }));
+  };
+
+  // Clases de las tarjetas de Calendario (sidebar izquierdo) y Colaboradores
+  // (sidebar derecho). Predeterminado = estilo original (no transparente).
+  const cardSurfaceClass = cardsTransparent
+    ? "bg-transparent border-transparent shadow-none"
+    : "bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]";
   const [showLyrics, setShowLyrics] = useState(false);
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
 
@@ -853,7 +915,7 @@ export default function Home() {
     }
   };
 
-  const currentBg = TAB_BACKGROUNDS[activeTab] ?? "";
+  const currentBg = tabBackgrounds[activeTab] ?? "";
 
   // Tab labels with emojis — cambia los emojis aquí si quieres quitarlos
   const TAB_LABELS: Record<string, string> = {
@@ -864,6 +926,7 @@ export default function Home() {
     music:    " Music",
     info:     "ℹ Info",
     contact:  " Contacto",
+    settings: "Configuración",
   };
 
   return (
@@ -1051,7 +1114,7 @@ export default function Home() {
         style={{ perspective: "1000px", perspectiveOrigin: "50% 45%", transformStyle: "preserve-3d" }}>
 
         {/* LEFT SIDEBAR */}
-        <div className="w-72 bg-white/5 backdrop-blur-2xl border border-white/10 p-5 pl-6 hidden md:flex flex-col overflow-hidden min-h-0 shrink-0 rounded-3xl self-stretch my-3 md:my-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform md:ml-1"
+        <div className={`w-72 ${cardSurfaceClass} p-5 pl-6 hidden md:flex flex-col overflow-hidden min-h-0 shrink-0 rounded-3xl self-stretch my-3 md:my-4 will-change-transform md:ml-1`}
           style={{ transform: "translate3d(12px, 0, 0) rotateY(32deg)", transformOrigin: "right center" }}>
           <div className="flex min-h-0 flex-1 flex-col gap-6 pt-[max(0.75rem,env(safe-area-inset-top,0px))] md:gap-8 md:pt-6 overflow-y-auto [-webkit-scrollbar:none] [scrollbar-width:none]">
             {/* ── CALENDARIO CORREGIDO ── */}
@@ -1150,13 +1213,25 @@ export default function Home() {
         {/* MAIN */}
         <div className="flex-1 min-w-0 min-h-0 p-6 flex flex-col relative z-[1] will-change-transform" style={{ transform: "translateZ(40px)" }}>
           {/* TABS CON EMOJIS */}
-          <div className="flex gap-6 mb-6 text-sm text-zinc-400 flex-wrap shrink-0">
+          <div className="flex items-center gap-6 mb-6 text-sm text-zinc-400 flex-wrap shrink-0">
             {["home", "projects", "apps", "ia", "music", "info", "contact"].map((tab) => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className={`font-semibold transition ${activeTab === tab ? "text-white" : "hover:text-white"} ${tab === "ia" ? "text-purple-400 hover:text-purple-300" : ""} ${tab === "contact" ? "text-cyan-400 hover:text-cyan-300" : ""}`}>
                 {TAB_LABELS[tab] ?? tab}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => setActiveTab("settings")}
+              title="Configuración"
+              aria-label="Configuración"
+              className={`ml-1 flex h-8 w-8 items-center justify-center rounded-full transition ${activeTab === "settings" ? "bg-white/15 text-white" : "text-zinc-400 hover:text-white hover:bg-white/10"}`}
+            >
+              <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
 
           <div className="flex flex-1 flex-col min-h-0 overflow-y-auto overflow-x-hidden [-webkit-scrollbar:none] [scrollbar-width:none] pr-2">
@@ -1491,11 +1566,95 @@ export default function Home() {
               </motion.div>
             )}
 
+            {activeTab === "settings" && (
+              <motion.div className="space-y-10 pb-8 max-w-3xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+                <header className="space-y-4">
+                  <h1 className="text-4xl sm:text-5xl font-medium tracking-tight text-transparent bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text">⚙️ Configuración</h1>
+                  <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-zinc-500">Tarjetas · fondos</p>
+                  <div className="h-px max-w-xs bg-gradient-to-r from-purple-500/70 via-fuchsia-500/40 to-transparent rounded-full" />
+                </header>
+
+                {/* Opción 1: transparencia de tarjetas */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
+                  <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-white flex items-center gap-3">
+                    <span className="h-1 w-10 shrink-0 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-400" aria-hidden />
+                    Tarjetas de Calendario y Colaboradores
+                  </h2>
+                  <p className="text-zinc-300/95 text-[15px] sm:text-base leading-[1.8] tracking-wide">
+                    Elige si las tarjetas del calendario y de colaboradores se ven transparentes o con su estilo original.
+                  </p>
+                  <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 max-w-md">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Tarjetas transparentes</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Predeterminado: apagado (estilo original)</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={cardsTransparent}
+                      onClick={() => setCardsTransparent((v) => !v)}
+                      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${cardsTransparent ? "bg-purple-500" : "bg-white/15"}`}
+                    >
+                      <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${cardsTransparent ? "translate-x-5" : "translate-x-0.5"}`} />
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* Opción 2: fondo por página */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
+                  <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-white flex items-center gap-3">
+                    <span className="h-1 w-10 shrink-0 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-400" aria-hidden />
+                    Fondo de cada página
+                  </h2>
+                  <p className="text-zinc-300/95 text-[15px] sm:text-base leading-[1.8] tracking-wide">
+                    Cambia el fondo de cada pestaña por separado. Las imágenes disponibles se agregan desde el código (arreglo <code className="text-purple-300">AVAILABLE_BACKGROUNDS</code>) usando tus links de Imgur.
+                  </p>
+                  <div className="space-y-6">
+                    {BACKGROUND_TABS.map((tab) => (
+                      <div key={tab} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-sm font-semibold text-white capitalize">{TAB_LABELS[tab]?.trim() || tab}</p>
+                          <button
+                            type="button"
+                            onClick={() => resetTabBackground(tab)}
+                            className="text-xs text-zinc-400 hover:text-white transition"
+                          >
+                            Restaurar original
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          {AVAILABLE_BACKGROUNDS.map((bg) => {
+                            const isSelected = tabBackgrounds[tab] === bg.url;
+                            return (
+                              <button
+                                key={bg.url + bg.name}
+                                type="button"
+                                onClick={() => setTabBackground(tab, bg.url)}
+                                title={bg.name}
+                                className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 transition ${isSelected ? "border-purple-400 ring-2 ring-purple-400/40" : "border-white/10 hover:border-white/30"}`}
+                              >
+                                <img src={bg.url} alt={bg.name} className="h-full w-full object-cover" />
+                                {isSelected && (
+                                  <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
           </div>
         </div>
 
         {/* RIGHT SIDEBAR — Collaborators + Reloj + Clima */}
-        <div className="relative w-80 bg-white/5 backdrop-blur-2xl border border-white/10 p-5 hidden lg:flex lg:flex-col overflow-y-auto shrink-0 rounded-3xl self-stretch my-3 md:my-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform [-webkit-scrollbar:none] [scrollbar-width:none]"
+        <div className={`relative w-80 ${cardSurfaceClass} p-5 hidden lg:flex lg:flex-col overflow-y-auto shrink-0 rounded-3xl self-stretch my-3 md:my-4 will-change-transform [-webkit-scrollbar:none] [scrollbar-width:none]`}
           style={{ transform: "translateZ(0) rotateY(-32deg)", transformOrigin: "left center" }}>
           <h2 className="text-lg font-semibold mb-4">Collaborators</h2>
           <div className="space-y-1">

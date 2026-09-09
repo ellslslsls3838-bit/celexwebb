@@ -21,7 +21,6 @@ const BACKGROUND_OPTIONS: Record<string, string> = {
   dark: "https://i.imgur.com/3KZ4qX9.png",
   gradient: "https://i.imgur.com/jX5pK2L.png",
   neon: "https://i.imgur.com/8Z9mQ4W.png",
-  custom: "custom",
 };
 
 const PAGES = ["home", "projects", "apps", "ia", "music"];
@@ -50,11 +49,6 @@ export default function SettingsPanel({
   };
 
   const handleBackgroundChange = (backgroundKey: string) => {
-    if (backgroundKey === "custom") {
-      // Aquí el usuario puede pegar su URL de Imgur
-      return;
-    }
-    
     const newBackgrounds = {
       ...backgrounds,
       [selectedPage]: BACKGROUND_OPTIONS[backgroundKey],
@@ -171,23 +165,21 @@ export default function SettingsPanel({
 
                   {/* Opciones de Fondo */}
                   <div className="space-y-2">
-                    {Object.entries(BACKGROUND_OPTIONS)
-                      .filter(([key]) => key !== "custom")
-                      .map(([key, url]) => (
-                        <motion.button
-                          key={key}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => handleBackgroundChange(key)}
-                          className={`w-full px-3 py-2 rounded-lg font-medium text-sm transition ${
-                            backgrounds[selectedPage] === url
-                              ? "bg-green-600/70 text-white border border-green-400"
-                              : "bg-white/10 hover:bg-white/20 text-white border border-transparent"
-                          }`}
-                        >
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </motion.button>
-                      ))}
+                    {Object.entries(BACKGROUND_OPTIONS).map(([key, url]) => (
+                      <motion.button
+                        key={key}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleBackgroundChange(key)}
+                        className={`w-full px-3 py-2 rounded-lg font-medium text-sm transition ${
+                          backgrounds[selectedPage] === url
+                            ? "bg-green-600/70 text-white border border-green-400"
+                            : "bg-white/10 hover:bg-white/20 text-white border border-transparent"
+                        }`}
+                      >
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </motion.button>
+                    ))}
                   </div>
 
                   {/* Input para URL Personalizada */}

@@ -104,8 +104,8 @@ const BACKGROUND_TABS = ["home", "projects", "apps", "ia", "music"] as const;
 type BackgroundOption = { name: string; url: string };
 const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Original", url: "https://i.imgur.com/Ompb0lt.png" },
-  { name: "city", url: "https://i.imgur.com/WoZFR5Q.jpeg" },
-  { name: "miku", url: "https://i.imgur.com/TDDP9r8.jpeg" },
+  { name: "girl", url: "]https://i.imgur.com/edLtiYT.jpeg" },
+  { name: "miku", url: "https://i.imgur.com/jub6cmq.jpeg" },
   { name: "w girl", url: "https://i.imgur.com/tZpX30Q.png" },
 ];
 
@@ -170,9 +170,9 @@ const collaborators: CollaboratorProfile[] = [
     username: "xxq7131",
     role: "Developer",
     img: "https://i.imgur.com/XmbGsBE.jpeg",
-    banner: "https://i.imgur.com/H2HXJY0.jpeg",
+    banner: "https://i.imgur.com/5aq3F0c.jpeg",
     customStatus: "",
-    bio: "ilove cats ",
+    bio: "¿por que no soy suficiente? ",
     link: "https://guns.lol/celexsex",
     status: "dnd",
   },

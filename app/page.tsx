@@ -104,9 +104,9 @@ const BACKGROUND_TABS = ["home", "projects", "apps", "ia", "music"] as const;
 type BackgroundOption = { name: string; url: string };
 const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Original", url: "https://i.imgur.com/Ompb0lt.png" },
-  { name: "cat", url: "https://i.imgur.com/WoZFR5Q.jpeg" },
-  { name: "Fondo 3", url: "https://i.imgur.com/FppGRaZpng" },
-  { name: "Fondo 4", url: "https://i.imgur.com/aG4zFeJ.png" },
+  { name: "city", url: "https://i.imgur.com/WoZFR5Q.jpeg" },
+  { name: "miku", url: "https://i.imgur.com/TDDP9r8.jpeg" },
+  { name: "w girl", url: "https://i.imgur.com/tZpX30Q.png" },
 ];
 
 const SETTINGS_STORAGE_KEY = "site-settings-v1";

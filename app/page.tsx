@@ -104,7 +104,7 @@ const BACKGROUND_TABS = ["home", "projects", "apps", "ia", "music"] as const;
 type BackgroundOption = { name: string; url: string };
 const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Original", url: "https://i.imgur.com/Ompb0lt.png" },
-  { name: "Fondo 2", url: "https://i.imgur.com/TkPfwrh.png" },
+  { name: "cat", url: "https://i.imgur.com/5ccsxgY.mp4" },
   { name: "Fondo 3", url: "https://i.imgur.com/FppGRaZ.png" },
   { name: "Fondo 4", url: "https://i.imgur.com/aG4zFeJ.png" },
 ];

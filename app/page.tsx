@@ -106,6 +106,7 @@ const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Original", url: "https://i.imgur.com/Ompb0lt.png" },
   { name: "Fondo 2", url: "https://i.imgur.com/edLtiYT.jpeg" },
   { name: "Fondo 3", url: "https://i.imgur.com/jub6cmq.jpeg" },
+  { name: "w girl", url: "https://i.imgur.com/tZpX30Q.png" },
   ]; 
 
 const SETTINGS_STORAGE_KEY = "site-settings-v1";

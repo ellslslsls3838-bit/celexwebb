@@ -99,8 +99,9 @@ const DEFAULT_TAB_BACKGROUNDS: Record<string, string> = {
 const BACKGROUND_TABS = ["home", "projects", "apps", "ia", "music"] as const;
 
 // Catálogo de fondos disponibles para elegir en Configuración.
-// Agrega aquí tus propios links de Imgur (name = lo que se ve en el selector,
-// url = el link directo de la imagen). Puedes repetir o quitar los que quieras.
+// Agrega aquí tus propios links de Imgur (imagen) o de video (mp4/webm, por
+// ejemplo un link de Cloudinary como los que ya usas en `movies`).
+// name = lo que se ve en el selector, url = el link directo del archivo.
 type BackgroundOption = { name: string; url: string };
 const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Original", url: "https://i.imgur.com/Ompb0lt.png" },
@@ -108,6 +109,12 @@ const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Fondo 3", url: "https://i.imgur.com/jub6cmq.jpeg" },
   { name: "girl", url: "https://i.imgur.com/tZpX30Q.png" },
   ]; 
+
+// Detecta si una URL de fondo es un video (por su extensión) para poder
+// renderizarla con <video> en vez de background-image.
+function isVideoBackground(url: string): boolean {
+  return /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url);
+}
 
 const SETTINGS_STORAGE_KEY = "site-settings-v1";
 
@@ -942,10 +949,24 @@ export default function Home() {
       {/* FONDO DE TAB */}
       <AnimatePresence>
         {currentBg && (
-          <motion.div key={currentBg} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{ backgroundImage: `url(${currentBg})`, backgroundSize: "cover", backgroundPosition: "center bottom", backgroundRepeat: "no-repeat", opacity: 0.18 }}
-          />
+          isVideoBackground(currentBg) ? (
+            <motion.video
+              key={currentBg}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+              className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+              style={{ opacity: 0.18, objectPosition: "center bottom" }}
+              src={currentBg}
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          ) : (
+            <motion.div key={currentBg} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+              className="pointer-events-none absolute inset-0 z-0"
+              style={{ backgroundImage: `url(${currentBg})`, backgroundSize: "cover", backgroundPosition: "center bottom", backgroundRepeat: "no-repeat", opacity: 0.18 }}
+            />
+          )
         )}
       </AnimatePresence>
 
@@ -1606,7 +1627,7 @@ export default function Home() {
                     Fondo de cada página
                   </h2>
                   <p className="text-zinc-300/95 text-[15px] sm:text-base leading-[1.8] tracking-wide">
-                    Cambia el fondo de cada pestaña por separado. Las imágenes disponibles se agregan desde el código (arreglo <code className="text-purple-300">AVAILABLE_BACKGROUNDS</code>) usando tus links de Imgur.
+                    Cambia el fondo de cada pestaña por separado. Puede ser imagen o video (mp4/webm). Las opciones disponibles se agregan desde el código (arreglo <code className="text-purple-300">AVAILABLE_BACKGROUNDS</code>) usando tus links de Imgur o Cloudinary.
                   </p>
                   <div className="space-y-6">
                     {BACKGROUND_TABS.map((tab) => (
@@ -1624,6 +1645,7 @@ export default function Home() {
                         <div className="flex flex-wrap gap-3">
                           {AVAILABLE_BACKGROUNDS.map((bg) => {
                             const isSelected = tabBackgrounds[tab] === bg.url;
+                            const isVideo = isVideoBackground(bg.url);
                             return (
                               <button
                                 key={bg.url + bg.name}
@@ -1632,7 +1654,14 @@ export default function Home() {
                                 title={bg.name}
                                 className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 transition ${isSelected ? "border-purple-400 ring-2 ring-purple-400/40" : "border-white/10 hover:border-white/30"}`}
                               >
-                                <img src={bg.url} alt={bg.name} className="h-full w-full object-cover" />
+                                {isVideo ? (
+                                  <video src={bg.url} className="h-full w-full object-cover" autoPlay loop muted playsInline />
+                                ) : (
+                                  <img src={bg.url} alt={bg.name} className="h-full w-full object-cover" />
+                                )}
+                                {isVideo && (
+                                  <span className="absolute bottom-1 right-1 rounded bg-black/60 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">Video</span>
+                                )}
                                 {isSelected && (
                                   <span className="absolute inset-0 flex items-center justify-center bg-black/40">
                                     <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>

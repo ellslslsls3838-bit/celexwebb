@@ -108,6 +108,7 @@ const AVAILABLE_BACKGROUNDS: BackgroundOption[] = [
   { name: "Fondo 2", url: "https://i.imgur.com/edLtiYT.jpeg" },
   { name: "Fondo 3", url: "https://i.imgur.com/jub6cmq.jpeg" },
   { name: "girl", url: "https://i.imgur.com/tZpX30Q.png" },
+  {name: "cat video", url: "https://i.imgur.com/uvPmF7U.mp4" },
   ]; 
 
 // Detecta si una URL de fondo es un video (por su extensión) para poder
